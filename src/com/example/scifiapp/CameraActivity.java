@@ -10,6 +10,7 @@ public class CameraActivity extends Activity {
 	
 	private Camera mCamera;
 	private CameraPreview mPreview;
+	private DrawView detectEdge;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,8 +21,11 @@ public class CameraActivity extends Activity {
 		
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
+        detectEdge = new DrawView(this);
+        
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
+        preview.addView(detectEdge);
 	}
 
 	@Override
