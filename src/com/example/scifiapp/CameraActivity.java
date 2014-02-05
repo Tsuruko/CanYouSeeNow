@@ -59,6 +59,5 @@ public class CameraActivity extends Activity {
 		//mCamera.stopPreview();
 		mCamera.release();
 	}
-
 	
 }
