@@ -1,8 +1,10 @@
 package com.example.scifiapp;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.View;
 
 public class StartScreenActivity extends Activity {
 	
@@ -20,4 +22,7 @@ public class StartScreenActivity extends Activity {
 		return true;
 	}
 
+	public void startGame(View view) {
+		startActivity(new Intent(this, CameraActivity.class));
+	}
 }
