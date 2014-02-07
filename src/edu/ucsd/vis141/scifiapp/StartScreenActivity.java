@@ -11,7 +11,7 @@ public class StartScreenActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_camera);
+		setContentView(R.layout.activity_startscreen);
 	}
 
 	@Override

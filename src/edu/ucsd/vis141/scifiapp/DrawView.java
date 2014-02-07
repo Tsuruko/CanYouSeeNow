@@ -20,7 +20,7 @@ public class DrawView extends SurfaceView{
 
 	@Override
 	protected void onDraw(Canvas canvas){
-	    canvas.drawText("Hello World!", 50, 50, textPaint);
+	    canvas.drawText("Hello World!", 500, 500, textPaint);
 	}
 	
 }
