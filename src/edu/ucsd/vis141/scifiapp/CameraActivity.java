@@ -4,6 +4,11 @@
  * 
  * Created By: Monica Liu
  * Last Modified 2/10/14
+ * 
+ * CameraActivity.java
+ *   Main Activity holding the camera display. Constantly updates the
+ *   surface overlay drawView in a timer task loop
+ *   
  ********************************/
 
 package edu.ucsd.vis141.scifiapp;

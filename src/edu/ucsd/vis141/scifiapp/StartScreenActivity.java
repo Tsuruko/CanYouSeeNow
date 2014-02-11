@@ -1,3 +1,17 @@
+/*********************************
+ * UCSD VIS 141A project
+ * SciFiAPP
+ * 
+ * Created By: Monica Liu
+ * Last Modified 2/10/14
+ * 
+ * StartScreenActivity:
+ *   Launch activity with basic layout.
+ *   Has a button to begin the game.
+ *   May later feature more game options
+ *   
+ ********************************/
+
 package edu.ucsd.vis141.scifiapp;
 
 import android.app.Activity;

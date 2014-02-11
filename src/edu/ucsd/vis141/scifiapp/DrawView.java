@@ -4,6 +4,11 @@
  * 
  * Created By: Monica Liu
  * Last Modified 2/10/14
+ * 
+ * DrawView.java:
+ *   A drawview class used to overlay the sufaceview holding the camera preview.
+ *   The edges found in the image are drawn on this view using canvas and paint.
+ *   
  ********************************/
 
 package edu.ucsd.vis141.scifiapp;

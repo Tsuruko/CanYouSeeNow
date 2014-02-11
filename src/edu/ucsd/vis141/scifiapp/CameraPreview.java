@@ -4,6 +4,12 @@
  * 
  * Created By: Monica Liu
  * Last Modified 2/10/14
+ * 
+ * CameraPreview.java:
+ *   A SurfaceView/SurfaceHolder callback for holding the camera preview
+ *   Takes a pictures every 10 preview frame updates and uses it to find edges
+ *   in the environment
+ *   
  ********************************/
 
 package edu.ucsd.vis141.scifiapp;
