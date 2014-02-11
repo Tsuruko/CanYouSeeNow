@@ -8,6 +8,8 @@
  * CameraActivity.java
  *   Main Activity holding the camera display. Constantly updates the
  *   surface overlay drawView in a timer task loop
+ *   The camera is locked to landscape to prevent some stretching
+ *   and rotation of the camera preview.
  *   
  ********************************/
 
@@ -17,7 +19,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.view.View;
@@ -35,14 +39,16 @@ public class CameraActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
 		
-		View decorView = getWindow().getDecorView();
-		//Hide the status bar
-		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-		decorView.setSystemUiVisibility(uiOptions);
-		//Hide the action bar
-		ActionBar actionBar = getActionBar();
-		actionBar.hide();
-	
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+			View decorView = getWindow().getDecorView();
+			//Hide the status bar
+			int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+			decorView.setSystemUiVisibility(uiOptions);
+			//Hide the action bar
+			ActionBar actionBar = getActionBar();
+			actionBar.hide();
+		}
+			
 		mCamera = getCameraInstance();
 
         // Create our Preview view and set it as the content of our activity.
@@ -59,6 +65,8 @@ public class CameraActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		timer.cancel();
+		mCamera.stopPreview();
 		mCamera.release();
 	}
 	
@@ -80,6 +88,7 @@ public class CameraActivity extends Activity {
 			CameraActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					//continuously refresh the drawview surface
 					detectEdge.invalidate();
 				}
 			});	

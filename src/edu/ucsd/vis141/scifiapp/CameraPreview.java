@@ -71,6 +71,13 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
+        Camera.Parameters parameters = mCamera.getParameters();
+        Camera.Size size = getBestPreviewSize(w, h, parameters);
+        if (size != null) {
+            parameters.setPreviewSize(size.width, size.height);
+            Log.d(TAG, "Using width=" + size.width + " height=" + size.height);
+        }
+        mCamera.setParameters(parameters);
 
         if (mHolder.getSurface() == null){
           // preview surface does not exist
@@ -99,6 +106,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     
     Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
     	public void onPreviewFrame(byte[] data, Camera camera) {
+            if (data == null) return;
+            Camera.Size size = mCamera.getParameters().getPreviewSize();
+            if (size == null) return;
+            
     		if (count > 10) {
     			//take pic and analyze
     			DataHolder.getInstance().setDisplay("UPDATE");
@@ -111,8 +122,28 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     	}
     };
     
+    //calculate where the edges are, return data to the global data holder
     protected void findEdges() {
     	
     }
     
+    //adjust preview size to prevent distortion/stretching
+    private static Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
+        Camera.Size result = null;
+
+        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
+            if (size.width <= width && size.height <= height) {
+                if (result == null) {
+                    result = size;
+                } else {
+                    int resultArea = result.width * result.height;
+                    int newArea = size.width * size.height;
+
+                    if (newArea > resultArea) result = size;
+                }
+            }
+        }
+
+        return result;
+    }
 }

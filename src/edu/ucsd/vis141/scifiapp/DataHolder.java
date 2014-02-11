@@ -26,6 +26,7 @@ public class DataHolder {
 		display = s;
 	}
 	
+	//static declarations forcing one instance of this class
 	private static final DataHolder dataholder = new DataHolder();
 	public static DataHolder getInstance() {
 		return dataholder;
