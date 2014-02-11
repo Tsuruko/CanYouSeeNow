@@ -13,7 +13,9 @@ import java.util.TimerTask;
 
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.app.ActionBar;
 import android.app.Activity;
+import android.view.View;
 import android.widget.FrameLayout;
 
 public class CameraActivity extends Activity {
@@ -27,6 +29,14 @@ public class CameraActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
+		
+		View decorView = getWindow().getDecorView();
+		//Hide the status bar
+		int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+		decorView.setSystemUiVisibility(uiOptions);
+		//Hide the action bar
+		ActionBar actionBar = getActionBar();
+		actionBar.hide();
 	
 		mCamera = getCameraInstance();
 
@@ -39,6 +49,12 @@ public class CameraActivity extends Activity {
         preview.addView(detectEdge);
         timer.schedule(new reDraw(), 0, 100); 
         
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mCamera.release();
 	}
 	
 	/** A safe way to get an instance of the Camera object. */
