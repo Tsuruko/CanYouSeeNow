@@ -5,5 +5,8 @@
     <string name="action_settings">Settings</string>
     
     <string name="startButton">Start</string>
+    
+    <string name="hw">Hello World</string>
+    <string name="takePic">Frame Taken</string>
 
 </resources>

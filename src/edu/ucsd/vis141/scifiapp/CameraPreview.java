@@ -15,6 +15,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private static final String TAG = null;
 	private SurfaceHolder mHolder;
     private Camera mCamera;
+    private int count = 0;
 
     //default constructor
     public CameraPreview(Context context) {
@@ -42,6 +43,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // The Surface has been created, now tell the camera where to draw the preview.
         try {
             mCamera.setPreviewDisplay(holder);
+            mCamera.setPreviewCallback(previewCallback);
             mCamera.startPreview();
         } catch (IOException e) {
             Log.d(TAG, "Error setting camera preview: " + e.getMessage());
@@ -80,4 +82,23 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
     }
+    
+    Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
+    	public void onPreviewFrame(byte[] data, Camera camera) {
+    		if (count > 10) {
+    			//take pic and analyze
+    			DataHolder.getInstance().setDisplay("UPDATE");
+    			findEdges();
+    			count = 0;
+    		} else {
+    			DataHolder.getInstance().setDisplay("TESTDRAW");
+    			count++;
+    		}
+    	}
+    };
+    
+    protected void findEdges() {
+    	
+    }
+    
 }

@@ -1,5 +1,8 @@
 package edu.ucsd.vis141.scifiapp;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.app.Activity;
@@ -10,6 +13,7 @@ public class CameraActivity extends Activity {
 	private Camera mCamera;
 	private CameraPreview mPreview;
 	private DrawView detectEdge;
+	Timer timer = new Timer();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -17,7 +21,7 @@ public class CameraActivity extends Activity {
 		setContentView(R.layout.activity_camera);
 	
 		mCamera = getCameraInstance();
-		
+
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
         detectEdge = new DrawView(this);
@@ -25,6 +29,8 @@ public class CameraActivity extends Activity {
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
         preview.addView(detectEdge);
+        timer.schedule(new reDraw(), 0, 100); 
+        
 	}
 	
 	/** A safe way to get an instance of the Camera object. */
@@ -39,4 +45,15 @@ public class CameraActivity extends Activity {
 	    return c; // returns null if camera is unavailable
 	}
 	
+	class reDraw extends TimerTask {
+		@Override
+		public void run() {
+			CameraActivity.this.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					detectEdge.invalidate();
+				}
+			});	
+		}
+	};
 }
