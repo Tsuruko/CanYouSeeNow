@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- 
+ * UCSD VIS 141A project
+ * SciFiApp 
+ * 
+ * Created By: Monica Liu
+ * Last Modified 2/10/14  -->
+ 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
