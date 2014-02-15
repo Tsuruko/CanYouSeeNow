@@ -3,7 +3,6 @@ package edu.ucsd.vis141.scifiapp;
 import java.util.Arrays;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 
 /*********************************
  * UCSD VIS 141A project

@@ -17,9 +17,7 @@ package edu.ucsd.vis141.scifiapp;
 import java.io.IOException;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
 import android.os.Build;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -116,12 +114,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             
     		if (count > 1) {
     			//take pic and analyze
-    			DataHolder.getInstance().setDisplay("UPDATE");
     			int h = camera.getParameters().getPreviewSize().height;
     			int w = camera.getParameters().getPreviewSize().width;
     			
     			int[] rgb = decodeYUV420SP(data, w, h);
-    			
                 sourceFrame = Bitmap.createBitmap(rgb, w, h, Bitmap.Config.ARGB_8888);
     			
     			detector.setSourceImage(sourceFrame);
@@ -129,7 +125,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     			//sourceFrame.recycle();
     			count = 0;
     		} else {
-    			DataHolder.getInstance().setDisplay("TESTDRAW");
     			count++;
     		}
     	}

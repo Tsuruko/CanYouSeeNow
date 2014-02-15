@@ -1,7 +1,5 @@
 package edu.ucsd.vis141.scifiapp;
 
-import java.util.Arrays;
-
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,52 +15,47 @@ import android.graphics.Paint;
  * Last Modified 2/10/14
  * 
  * CannyEdgeDetector.java: 
- *   An implementation of a canny edge detector on bitmap files,
- *   adapted from a java canny edge detector by Tom Gibara
+ *   An implementation of a canny edge detector on bitmaps.
  *   
  ********************************/
 
 public class CannyEdgeDetector {
 
 	// statics
-	private final static float GAUSSIAN_CUT_OFF = 0.005f;
-	private final static float MAGNITUDE_SCALE = 100F;
-	private final static float MAGNITUDE_LIMIT = 1000F;
-	private final static int MAGNITUDE_MAX = (int) (MAGNITUDE_SCALE * MAGNITUDE_LIMIT);
+	private final static int RESIZE = 150;
+	//private final static float GAUSSIAN_CUT_OFF = 0.005f;
+	//private final static float MAGNITUDE_SCALE = 100F;
+	//private final static float MAGNITUDE_LIMIT = 1000F;
+	//private final static int MAGNITUDE_MAX = (int) (MAGNITUDE_SCALE * MAGNITUDE_LIMIT);
 
 	// fields
 	private int height, width;
 	private int originH, originW, ratio;
-	private int[] data;
-	private int[] magnitude;
 	private Bitmap sourceImage;
 	private Bitmap outputImage;
 	
 	private float sigma;
-	private float lowThreshold;
-	private float highThreshold;
+	//private float lowThreshold;
+	//private float highThreshold;
 	private int blurRadius;
-	private boolean contrastNormalized;
 	
 	float [][] kernel;
 	
 // constructors	
     //Constructs a new detector with default parameters.
 	public CannyEdgeDetector() {
-		lowThreshold = 2.5f;
-		highThreshold = 7.5f;
+		//lowThreshold = 2.5f;
+		//highThreshold = 7.5f;
 		sigma = 2f;
 		blurRadius = 6;
-		contrastNormalized = false;
 	}
 	//Constructs a new detector with an image
 	public CannyEdgeDetector(Bitmap source) {
 		this.sourceImage = source;
-		lowThreshold = 2.5f;
-		highThreshold = 7.5f;
+		//lowThreshold = 2.5f;
+		//highThreshold = 7.5f;
 		sigma = 2f;
 		blurRadius = 16;
-		contrastNormalized = false;
 	}
 	
 	public void setSourceImage(Bitmap m) {
@@ -76,38 +69,13 @@ public class CannyEdgeDetector {
 		initialize();
 		outputImage = resize(sourceImage);
 		outputImage = toGrayScale(outputImage);
+		outputImage = pad(outputImage);
 		outputImage = blur(outputImage);
-		//outputImage = fastblur(sourceImage, blurRadius);
-		computeGradients();
+		computeGradients(outputImage);
+		hysteresis();
+		threshold();
 		outputImage = restore(outputImage);
 		writeData();
-	}
-	
-	private void initialize() {
-		originW = sourceImage.getWidth();
-		originH = sourceImage.getHeight();
-		makeKernel(blurRadius);
-	}
-	
-	private Bitmap resize(Bitmap origin) {
-		int w = origin.getWidth();
-		ratio = w/100;
-		Bitmap resized = Bitmap.createScaledBitmap(origin, 100, origin.getHeight()/ratio, true);
-		width = resized.getWidth();
-		height = resized.getHeight();
-		return resized;	
-	}
-	
-	private Bitmap toGrayScale(Bitmap bmpOriginal) {
-		Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-		Canvas c = new Canvas(bmpGrayscale);
-		Paint paint = new Paint();
-		ColorMatrix cm = new ColorMatrix();
-		cm.setSaturation(0);
-		ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
-		paint.setColorFilter(f);
-		c.drawBitmap(bmpOriginal, 0, 0, paint);
-		return bmpGrayscale;
 	}
 	
 	private void makeKernel(int radius) {
@@ -128,15 +96,52 @@ public class CannyEdgeDetector {
 			}
 		}
 	}
-	private Bitmap blur(Bitmap gray) {
+	
+	private void initialize() {
+		originW = sourceImage.getWidth();
+		originH = sourceImage.getHeight();
+		makeKernel(blurRadius);
+	}
+	
+	
+	private Bitmap resize(Bitmap origin) {
+		int w = origin.getWidth();
+		ratio = w/RESIZE;
+		Bitmap resized = Bitmap.createScaledBitmap(origin, RESIZE, origin.getHeight()/ratio, true);
+		width = resized.getWidth();
+		height = resized.getHeight();
+		return resized;	
+	}
+	
+	private Bitmap toGrayScale(Bitmap bmpOriginal) {
+		Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+		Canvas c = new Canvas(bmpGrayscale);
+		Paint paint = new Paint();
+		ColorMatrix cm = new ColorMatrix();
+		cm.setSaturation(0);
+		ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+		paint.setColorFilter(f);
+		c.drawBitmap(bmpOriginal, 0, 0, paint);
+		return bmpGrayscale;
+	}
+	
+
+	private Bitmap pad(Bitmap gray) {
+		Bitmap pad = Bitmap.createBitmap(gray.getWidth()+blurRadius, gray.getHeight()+blurRadius, gray.getConfig());
+		Canvas c = new Canvas(pad);
+		c.drawBitmap(gray, 0, 0, null);
+		return pad;
+	}
+	
+	private Bitmap blur(Bitmap pad) {
 		//apply the kernel to the image to blur
-		Bitmap blurred = Bitmap.createBitmap(gray.getWidth(), gray.getHeight(), gray.getConfig());
+		Bitmap blurred = Bitmap.createBitmap(width, height, pad.getConfig());
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				float sum = 0;
 				for (int i = 0; i < blurRadius; i++) {
 					for (int j = 0; j < blurRadius; j++) {
-						sum += Color.red(gray.getPixel(x, y)) * kernel[i][j];	
+						sum += Color.red(pad.getPixel(x+i, y+j)) * kernel[i][j];	
 					}
 				}
 				blurred.setPixel(x, y, Color.rgb((int)sum, (int)sum, (int)sum));
@@ -145,8 +150,122 @@ public class CannyEdgeDetector {
 		return blurred;
 	}
 	
-	private void computeGradients() { 
+	private void computeGradients(Bitmap blurred) { 
+		Bitmap findGrad = pad(blurred);
+		float [][] sorbelX = new float[][]{ {-1, 0, 1},
+				                            {-2, 0, 2},
+											{-1, 0, 1}};
+		float [][] sorbelY = new float[][]{ {-1, -2, -1},
+											{0, 0, 0},
+											{1, 2, 1} };
 		
+		float [][] xGrad = new float[height][width];
+		float [][] yGrad = new float[height][width];
+		
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				float sumx = 0;
+				float sumy = 0;
+				for (int i = 0; i < 3; i++) {
+					for (int j = 0; j < 3; j++) {
+						sumx += Color.red(findGrad.getPixel(x+i, y+j)) * sorbelX[i][j];
+						sumy += Color.red(findGrad.getPixel(x+i, y+j)) * sorbelY[i][j];
+					}
+				}
+				xGrad[y][x] = sumx;
+				yGrad[y][x] = sumy;
+			}
+		}
+		//perform non-maximal suppression
+		/*
+		 		int index = x + y;
+				int indexN = index - width;
+				int indexS = index + width;
+				int indexW = index - 1;
+				int indexE = index + 1;
+				int indexNW = indexN - 1;
+				int indexNE = indexN + 1;
+				int indexSW = indexS - 1;
+				int indexSE = indexS + 1;
+				
+				float xGrad = xGradient[index];
+				float yGrad = yGradient[index];
+				float gradMag = hypot(xGrad, yGrad);
+
+				//perform non-maximal supression
+				float nMag = hypot(xGradient[indexN], yGradient[indexN]);
+				float sMag = hypot(xGradient[indexS], yGradient[indexS]);
+				float wMag = hypot(xGradient[indexW], yGradient[indexW]);
+				float eMag = hypot(xGradient[indexE], yGradient[indexE]);
+				float neMag = hypot(xGradient[indexNE], yGradient[indexNE]);
+				float seMag = hypot(xGradient[indexSE], yGradient[indexSE]);
+				float swMag = hypot(xGradient[indexSW], yGradient[indexSW]);
+				float nwMag = hypot(xGradient[indexNW], yGradient[indexNW]);
+				float tmp;
+				*/
+				/*
+				 * An explanation of what's happening here, for those who want
+				 * to understand the source: This performs the "non-maximal
+				 * supression" phase of the Canny edge detection in which we
+				 * need to compare the gradient magnitude to that in the
+				 * direction of the gradient; only if the value is a local
+				 * maximum do we consider the point as an edge candidate.
+				 * 
+				 * We need to break the comparison into a number of different
+				 * cases depending on the gradient direction so that the
+				 * appropriate values can be used. To avoid computing the
+				 * gradient direction, we use two simple comparisons: first we
+				 * check that the partial derivatives have the same sign (1)
+				 * and then we check which is larger (2). As a consequence, we
+				 * have reduced the problem to one of four identical cases that
+				 * each test the central gradient magnitude against the values at
+				 * two points with 'identical support'; what this means is that
+				 * the geometry required to accurately interpolate the magnitude
+				 * of gradient function at those points has an identical
+				 * geometry (upto right-angled-rotation/reflection).
+				 * 
+				 * When comparing the central gradient to the two interpolated
+				 * values, we avoid performing any divisions by multiplying both
+				 * sides of each inequality by the greater of the two partial
+				 * derivatives. The common comparand is stored in a temporary
+				 * variable (3) and reused in the mirror case (4).
+				 * 
+				 */
+		/*
+				if (xGrad * yGrad <= (float) 0 //(1)
+					? Math.abs(xGrad) >= Math.abs(yGrad) //(2)
+						? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * neMag - (xGrad + yGrad) * eMag) //(3)
+							&& tmp > Math.abs(yGrad * swMag - (xGrad + yGrad) * wMag) //(4)
+						: (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * neMag - (yGrad + xGrad) * nMag) //(3)
+							&& tmp > Math.abs(xGrad * swMag - (yGrad + xGrad) * sMag) //(4)
+					: Math.abs(xGrad) >= Math.abs(yGrad) //(2)
+						? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * seMag + (xGrad - yGrad) * eMag) //(3)
+							&& tmp > Math.abs(yGrad * nwMag + (xGrad - yGrad) * wMag) //(4)
+						: (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * seMag + (yGrad - xGrad) * sMag) //(3)
+							&& tmp > Math.abs(xGrad * nwMag + (yGrad - xGrad) * nMag) //(4)
+					) {
+					magnitude[index] = gradMag >= MAGNITUDE_LIMIT ? MAGNITUDE_MAX : (int) (MAGNITUDE_SCALE * gradMag);
+					//NOTE: The orientation of the edge is not employed by this
+					//implementation. It is a simple matter to compute it at
+					//this point as: Math.atan2(yGrad, xGrad);
+				} else {
+					magnitude[index] = 0;
+				}
+		 */
+	}
+	
+	private void hysteresis() {
+		
+	}
+	
+	private void threshold() {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (Color.red(outputImage.getPixel(x, y)) < 10) {
+					outputImage.setPixel(x, y, Color.BLACK);   //Color.TRANSPARENT
+				}
+			}
+		}
 	}
 	
 	private Bitmap restore(Bitmap shrunk) {
@@ -159,236 +278,4 @@ public class CannyEdgeDetector {
 		DataHolder.getInstance().setStatus();
 		//sourceImage.recycle();
 	}
-	
-	public Bitmap fastblur(Bitmap sentBitmap, int radius) {
-
-        // Stack Blur v1.0 from
-        // http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
-        //
-        // Java Author: Mario Klingemann <mario at quasimondo.com>
-        // http://incubator.quasimondo.com
-        // created Feburary 29, 2004
-        // Android port : Yahel Bouaziz <yahel at kayenko.com>
-        // http://www.kayenko.com
-        // ported april 5th, 2012
-
-        // This is a compromise between Gaussian Blur and Box blur
-        // It creates much better looking blurs than Box Blur, but is
-        // 7x faster than my Gaussian Blur implementation.
-        //
-        // I called it Stack Blur because this describes best how this
-        // filter works internally: it creates a kind of moving stack
-        // of colors whilst scanning through the image. Thereby it
-        // just has to add one new block of color to the right side
-        // of the stack and remove the leftmost color. The remaining
-        // colors on the topmost layer of the stack are either added on
-        // or reduced by one, depending on if they are on the right or
-        // on the left side of the stack.
-        //
-        // If you are using this algorithm in your code please add
-        // the following line:
-        //
-        // Stack Blur Algorithm by Mario Klingemann <mario@quasimondo.com>
-
-        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
-
-        if (radius < 1) {
-            return (null);
-        }
-
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-
-        int[] pix = new int[w * h];
-        //Log.e("pix", w + " " + h + " " + pix.length);
-        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
-
-        int wm = w - 1;
-        int hm = h - 1;
-        int wh = w * h;
-        int div = radius + radius + 1;
-
-        int r[] = new int[wh];
-        int g[] = new int[wh];
-        int b[] = new int[wh];
-        int rsum, gsum, bsum, x, y, i, p, yp, yi, yw;
-        int vmin[] = new int[Math.max(w, h)];
-
-        int divsum = (div + 1) >> 1;
-        divsum *= divsum;
-        int dv[] = new int[256 * divsum];
-        for (i = 0; i < 256 * divsum; i++) {
-            dv[i] = (i / divsum);
-        }
-
-        yw = yi = 0;
-
-        int[][] stack = new int[div][3];
-        int stackpointer;
-        int stackstart;
-        int[] sir;
-        int rbs;
-        int r1 = radius + 1;
-        int routsum, goutsum, boutsum;
-        int rinsum, ginsum, binsum;
-
-        for (y = 0; y < h; y++) {
-            rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
-            for (i = -radius; i <= radius; i++) {
-                p = pix[yi + Math.min(wm, Math.max(i, 0))];
-                sir = stack[i + radius];
-                sir[0] = (p & 0xff0000) >> 16;
-                sir[1] = (p & 0x00ff00) >> 8;
-                sir[2] = (p & 0x0000ff);
-                rbs = r1 - Math.abs(i);
-                rsum += sir[0] * rbs;
-                gsum += sir[1] * rbs;
-                bsum += sir[2] * rbs;
-                if (i > 0) {
-                    rinsum += sir[0];
-                    ginsum += sir[1];
-                    binsum += sir[2];
-                } else {
-                    routsum += sir[0];
-                    goutsum += sir[1];
-                    boutsum += sir[2];
-                }
-            }
-            stackpointer = radius;
-
-            for (x = 0; x < w; x++) {
-
-                r[yi] = dv[rsum];
-                g[yi] = dv[gsum];
-                b[yi] = dv[bsum];
-
-                rsum -= routsum;
-                gsum -= goutsum;
-                bsum -= boutsum;
-
-                stackstart = stackpointer - radius + div;
-                sir = stack[stackstart % div];
-
-                routsum -= sir[0];
-                goutsum -= sir[1];
-                boutsum -= sir[2];
-
-                if (y == 0) {
-                    vmin[x] = Math.min(x + radius + 1, wm);
-                }
-                p = pix[yw + vmin[x]];
-
-                sir[0] = (p & 0xff0000) >> 16;
-                sir[1] = (p & 0x00ff00) >> 8;
-                sir[2] = (p & 0x0000ff);
-
-                rinsum += sir[0];
-                ginsum += sir[1];
-                binsum += sir[2];
-
-                rsum += rinsum;
-                gsum += ginsum;
-                bsum += binsum;
-
-                stackpointer = (stackpointer + 1) % div;
-                sir = stack[(stackpointer) % div];
-
-                routsum += sir[0];
-                goutsum += sir[1];
-                boutsum += sir[2];
-
-                rinsum -= sir[0];
-                ginsum -= sir[1];
-                binsum -= sir[2];
-
-                yi++;
-            }
-            yw += w;
-        }
-        for (x = 0; x < w; x++) {
-            rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
-            yp = -radius * w;
-            for (i = -radius; i <= radius; i++) {
-                yi = Math.max(0, yp) + x;
-
-                sir = stack[i + radius];
-
-                sir[0] = r[yi];
-                sir[1] = g[yi];
-                sir[2] = b[yi];
-
-                rbs = r1 - Math.abs(i);
-
-                rsum += r[yi] * rbs;
-                gsum += g[yi] * rbs;
-                bsum += b[yi] * rbs;
-
-                if (i > 0) {
-                    rinsum += sir[0];
-                    ginsum += sir[1];
-                    binsum += sir[2];
-                } else {
-                    routsum += sir[0];
-                    goutsum += sir[1];
-                    boutsum += sir[2];
-                }
-
-                if (i < hm) {
-                    yp += w;
-                }
-            }
-            yi = x;
-            stackpointer = radius;
-            for (y = 0; y < h; y++) {
-                // Preserve alpha channel: ( 0xff000000 & pix[yi] )
-                pix[yi] = ( 0xff000000 & pix[yi] ) | ( dv[rsum] << 16 ) | ( dv[gsum] << 8 ) | dv[bsum];
-
-                rsum -= routsum;
-                gsum -= goutsum;
-                bsum -= boutsum;
-
-                stackstart = stackpointer - radius + div;
-                sir = stack[stackstart % div];
-
-                routsum -= sir[0];
-                goutsum -= sir[1];
-                boutsum -= sir[2];
-
-                if (x == 0) {
-                    vmin[y] = Math.min(y + r1, hm) * w;
-                }
-                p = x + vmin[y];
-
-                sir[0] = r[p];
-                sir[1] = g[p];
-                sir[2] = b[p];
-
-                rinsum += sir[0];
-                ginsum += sir[1];
-                binsum += sir[2];
-
-                rsum += rinsum;
-                gsum += ginsum;
-                bsum += binsum;
-
-                stackpointer = (stackpointer + 1) % div;
-                sir = stack[stackpointer];
-
-                routsum += sir[0];
-                goutsum += sir[1];
-                boutsum += sir[2];
-
-                rinsum -= sir[0];
-                ginsum -= sir[1];
-                binsum -= sir[2];
-
-                yi += w;
-            }
-        }
-
-        //Log.e("pix", w + " " + h + " " + pix.length);
-        bitmap.setPixels(pix, 0, w, 0, 0, w, h);
-
-        return (bitmap);
-    }
 }

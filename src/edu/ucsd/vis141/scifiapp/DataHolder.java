@@ -18,7 +18,6 @@ import android.graphics.Bitmap;
 
 public class DataHolder {
 	
-	private String display = "";
 	private Bitmap drawing;
 	private boolean status = false;
 	
@@ -29,14 +28,6 @@ public class DataHolder {
 	public void setBitmap(Bitmap m) {
 		//drawing.recycle();
 		drawing = m;
-	}
-	
-	public String getDisplay() {
-		return display;
-	}
-	
-	public void setDisplay(String s) {
-		display = s;
 	}
 	
 	public boolean getStatus() {

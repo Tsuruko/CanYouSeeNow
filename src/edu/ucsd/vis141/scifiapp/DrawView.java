@@ -1,9 +1,7 @@
 package edu.ucsd.vis141.scifiapp;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.view.SurfaceView;
 
@@ -21,14 +19,9 @@ import android.view.SurfaceView;
  ********************************/
 
 public class DrawView extends SurfaceView{
-	
-	private Paint textPaint = new Paint();
 
 	public DrawView(Context context) {
 		super(context);
-		
-		textPaint.setARGB(255, 200, 0, 0);
-		textPaint.setTextSize(60);
 		
 		setWillNotDraw(false);
 	}
@@ -37,7 +30,6 @@ public class DrawView extends SurfaceView{
 	protected void onDraw(Canvas canvas){
 		canvas.drawColor(0, Mode.CLEAR);
 		if (DataHolder.getInstance().getStatus()) canvas.drawBitmap(DataHolder.getInstance().getBitmap(), 0, 0, null);
-	    canvas.drawText(DataHolder.getInstance().getDisplay(), 500, 500, textPaint);
 	}
 	
 }
