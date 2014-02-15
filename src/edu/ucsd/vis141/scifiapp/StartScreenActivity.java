@@ -1,3 +1,11 @@
+package edu.ucsd.vis141.scifiapp;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.View;
+
 /*********************************
  * UCSD VIS 141A project
  * SciFiAPP
@@ -11,14 +19,6 @@
  *   May later feature more game options
  *   
  ********************************/
-
-package edu.ucsd.vis141.scifiapp;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.View;
 
 public class StartScreenActivity extends Activity {
 	

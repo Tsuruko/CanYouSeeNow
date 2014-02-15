@@ -1,3 +1,7 @@
+package edu.ucsd.vis141.scifiapp;
+
+import android.graphics.Bitmap;
+
 /*********************************
  * UCSD VIS 141A project
  * SciFiAPP
@@ -12,11 +16,20 @@
  *   
  ********************************/
 
-package edu.ucsd.vis141.scifiapp;
-
 public class DataHolder {
 	
 	private String display = "";
+	private Bitmap drawing;
+	private boolean status = false;
+	
+	public Bitmap getBitmap() {
+		return drawing;
+	}
+	
+	public void setBitmap(Bitmap m) {
+		//drawing.recycle();
+		drawing = m;
+	}
 	
 	public String getDisplay() {
 		return display;
@@ -24,6 +37,14 @@ public class DataHolder {
 	
 	public void setDisplay(String s) {
 		display = s;
+	}
+	
+	public boolean getStatus() {
+		return status;
+	}
+	
+	public void setStatus() {
+		if (drawing != null) status = true;
 	}
 	
 	//static declarations forcing one instance of this class

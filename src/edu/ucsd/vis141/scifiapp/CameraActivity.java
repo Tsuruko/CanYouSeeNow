@@ -1,3 +1,16 @@
+package edu.ucsd.vis141.scifiapp;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import android.hardware.Camera;
+import android.os.Build;
+import android.os.Bundle;
+import android.app.ActionBar;
+import android.app.Activity;
+import android.view.View;
+import android.widget.FrameLayout;
+
 /*********************************
  * UCSD VIS 141A project
  * SciFiAPP
@@ -13,20 +26,6 @@
  *   
  ********************************/
 
-package edu.ucsd.vis141.scifiapp;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
-import android.hardware.Camera;
-import android.os.Build;
-import android.os.Bundle;
-import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.app.Activity;
-import android.view.View;
-import android.widget.FrameLayout;
-
 public class CameraActivity extends Activity {
 	
 	private Camera mCamera;
@@ -39,7 +38,7 @@ public class CameraActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
 		
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			View decorView = getWindow().getDecorView();
 			//Hide the status bar
 			int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -94,4 +93,5 @@ public class CameraActivity extends Activity {
 			});	
 		}
 	};
+	
 }

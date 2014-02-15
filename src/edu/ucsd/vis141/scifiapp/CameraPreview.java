@@ -15,9 +15,11 @@
 package edu.ucsd.vis141.scifiapp;
 
 import java.io.IOException;
-
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.hardware.Camera.PictureCallback;
 import android.os.Build;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -30,6 +32,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	private SurfaceHolder mHolder;
     private Camera mCamera;
     private int count = 0;
+    private Bitmap sourceFrame;
+    CannyEdgeDetector detector = new CannyEdgeDetector();
 
     //default constructor
     public CameraPreview(Context context) {
@@ -110,10 +114,19 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             Camera.Size size = mCamera.getParameters().getPreviewSize();
             if (size == null) return;
             
-    		if (count > 10) {
+    		if (count > 1) {
     			//take pic and analyze
     			DataHolder.getInstance().setDisplay("UPDATE");
-    			findEdges();
+    			int h = camera.getParameters().getPreviewSize().height;
+    			int w = camera.getParameters().getPreviewSize().width;
+    			
+    			int[] rgb = decodeYUV420SP(data, w, h);
+    			
+                sourceFrame = Bitmap.createBitmap(rgb, w, h, Bitmap.Config.ARGB_8888);
+    			
+    			detector.setSourceImage(sourceFrame);
+    			detector.findEdges();
+    			//sourceFrame.recycle();
     			count = 0;
     		} else {
     			DataHolder.getInstance().setDisplay("TESTDRAW");
@@ -122,10 +135,38 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     	}
     };
     
-    //calculate where the edges are, return data to the global data holder
-    protected void findEdges() {
-    	
-    }
+    public int[] decodeYUV420SP( byte[] yuv420sp, int width, int height) {   
+
+        final int frameSize = width * height;   
+
+        int rgb[]=new int[width*height];   
+        for (int j = 0, yp = 0; j < height; j++) {   
+            int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;   
+            for (int i = 0; i < width; i++, yp++) {   
+                int y = (0xff & ((int) yuv420sp[yp])) - 16;   
+                if (y < 0) y = 0;   
+                if ((i & 1) == 0) {   
+                    v = (0xff & yuv420sp[uvp++]) - 128;   
+                    u = (0xff & yuv420sp[uvp++]) - 128;   
+                }   
+
+                int y1192 = 1192 * y;   
+                int r = (y1192 + 1634 * v);   
+                int g = (y1192 - 833 * v - 400 * u);   
+                int b = (y1192 + 2066 * u);   
+
+                if (r < 0) r = 0; else if (r > 262143) r = 262143;   
+                if (g < 0) g = 0; else if (g > 262143) g = 262143;   
+                if (b < 0) b = 0; else if (b > 262143) b = 262143;   
+
+                rgb[yp] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) &    
+        0xff00) | ((b >> 10) & 0xff);   
+
+
+            }   
+        }   
+        return rgb;   
+        }
     
     //adjust preview size to prevent distortion/stretching
     private static Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
