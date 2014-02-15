@@ -22,11 +22,7 @@ import android.graphics.Paint;
 public class CannyEdgeDetector {
 
 	// statics
-	private final static int RESIZE = 150;
-	//private final static float GAUSSIAN_CUT_OFF = 0.005f;
-	//private final static float MAGNITUDE_SCALE = 100F;
-	//private final static float MAGNITUDE_LIMIT = 1000F;
-	//private final static int MAGNITUDE_MAX = (int) (MAGNITUDE_SCALE * MAGNITUDE_LIMIT);
+	private final static int RESIZE = 200;
 
 	// fields
 	private int height, width;
@@ -35,11 +31,12 @@ public class CannyEdgeDetector {
 	private Bitmap outputImage;
 	
 	private float sigma;
+	private int blurRadius;
 	//private float lowThreshold;
 	//private float highThreshold;
-	private int blurRadius;
 	
 	float [][] kernel;
+	float [][] mag;
 	
 // constructors	
     //Constructs a new detector with default parameters.
@@ -69,11 +66,11 @@ public class CannyEdgeDetector {
 		initialize();
 		outputImage = resize(sourceImage);
 		outputImage = toGrayScale(outputImage);
-		outputImage = pad(outputImage);
+		outputImage = pad(outputImage, blurRadius);
 		outputImage = blur(outputImage);
 		computeGradients(outputImage);
 		hysteresis();
-		threshold();
+		outputImage = threshold();
 		outputImage = restore(outputImage);
 		writeData();
 	}
@@ -126,8 +123,8 @@ public class CannyEdgeDetector {
 	}
 	
 
-	private Bitmap pad(Bitmap gray) {
-		Bitmap pad = Bitmap.createBitmap(gray.getWidth()+blurRadius, gray.getHeight()+blurRadius, gray.getConfig());
+	private Bitmap pad(Bitmap gray, int padding) {
+		Bitmap pad = Bitmap.createBitmap(gray.getWidth()+padding, gray.getHeight()+padding, gray.getConfig());
 		Canvas c = new Canvas(pad);
 		c.drawBitmap(gray, 0, 0, null);
 		return pad;
@@ -151,7 +148,7 @@ public class CannyEdgeDetector {
 	}
 	
 	private void computeGradients(Bitmap blurred) { 
-		Bitmap findGrad = pad(blurred);
+		Bitmap findGrad = pad(blurred, 3);
 		float [][] sorbelX = new float[][]{ {-1, 0, 1},
 				                            {-2, 0, 2},
 											{-1, 0, 1}};
@@ -159,8 +156,9 @@ public class CannyEdgeDetector {
 											{0, 0, 0},
 											{1, 2, 1} };
 		
-		float [][] xGrad = new float[height][width];
-		float [][] yGrad = new float[height][width];
+		float [][] xGrad = new float[width][height];
+		float [][] yGrad = new float[width][height];
+		mag = new float[width][height];
 		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -172,100 +170,59 @@ public class CannyEdgeDetector {
 						sumy += Color.red(findGrad.getPixel(x+i, y+j)) * sorbelY[i][j];
 					}
 				}
-				xGrad[y][x] = sumx;
-				yGrad[y][x] = sumy;
+				xGrad[x][y] = sumx;
+				yGrad[x][y] = sumy;
+				mag[x][y] = (float) Math.sqrt((sumx * sumx) + (sumy * sumy));
 			}
 		}
-		//perform non-maximal suppression
-		/*
-		 		int index = x + y;
-				int indexN = index - width;
-				int indexS = index + width;
-				int indexW = index - 1;
-				int indexE = index + 1;
-				int indexNW = indexN - 1;
-				int indexNE = indexN + 1;
-				int indexSW = indexS - 1;
-				int indexSE = indexS + 1;
-				
-				float xGrad = xGradient[index];
-				float yGrad = yGradient[index];
-				float gradMag = hypot(xGrad, yGrad);
+		findGrad.recycle();
 
-				//perform non-maximal supression
-				float nMag = hypot(xGradient[indexN], yGradient[indexN]);
-				float sMag = hypot(xGradient[indexS], yGradient[indexS]);
-				float wMag = hypot(xGradient[indexW], yGradient[indexW]);
-				float eMag = hypot(xGradient[indexE], yGradient[indexE]);
-				float neMag = hypot(xGradient[indexNE], yGradient[indexNE]);
-				float seMag = hypot(xGradient[indexSE], yGradient[indexSE]);
-				float swMag = hypot(xGradient[indexSW], yGradient[indexSW]);
-				float nwMag = hypot(xGradient[indexNW], yGradient[indexNW]);
-				float tmp;
-				*/
-				/*
-				 * An explanation of what's happening here, for those who want
-				 * to understand the source: This performs the "non-maximal
-				 * supression" phase of the Canny edge detection in which we
-				 * need to compare the gradient magnitude to that in the
-				 * direction of the gradient; only if the value is a local
-				 * maximum do we consider the point as an edge candidate.
-				 * 
-				 * We need to break the comparison into a number of different
-				 * cases depending on the gradient direction so that the
-				 * appropriate values can be used. To avoid computing the
-				 * gradient direction, we use two simple comparisons: first we
-				 * check that the partial derivatives have the same sign (1)
-				 * and then we check which is larger (2). As a consequence, we
-				 * have reduced the problem to one of four identical cases that
-				 * each test the central gradient magnitude against the values at
-				 * two points with 'identical support'; what this means is that
-				 * the geometry required to accurately interpolate the magnitude
-				 * of gradient function at those points has an identical
-				 * geometry (upto right-angled-rotation/reflection).
-				 * 
-				 * When comparing the central gradient to the two interpolated
-				 * values, we avoid performing any divisions by multiplying both
-				 * sides of each inequality by the greater of the two partial
-				 * derivatives. The common comparand is stored in a temporary
-				 * variable (3) and reused in the mirror case (4).
-				 * 
-				 */
-		/*
-				if (xGrad * yGrad <= (float) 0 //(1)
-					? Math.abs(xGrad) >= Math.abs(yGrad) //(2)
-						? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * neMag - (xGrad + yGrad) * eMag) //(3)
-							&& tmp > Math.abs(yGrad * swMag - (xGrad + yGrad) * wMag) //(4)
-						: (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * neMag - (yGrad + xGrad) * nMag) //(3)
-							&& tmp > Math.abs(xGrad * swMag - (yGrad + xGrad) * sMag) //(4)
-					: Math.abs(xGrad) >= Math.abs(yGrad) //(2)
-						? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * seMag + (xGrad - yGrad) * eMag) //(3)
-							&& tmp > Math.abs(yGrad * nwMag + (xGrad - yGrad) * wMag) //(4)
-						: (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * seMag + (yGrad - xGrad) * sMag) //(3)
-							&& tmp > Math.abs(xGrad * nwMag + (yGrad - xGrad) * nMag) //(4)
-					) {
-					magnitude[index] = gradMag >= MAGNITUDE_LIMIT ? MAGNITUDE_MAX : (int) (MAGNITUDE_SCALE * gradMag);
-					//NOTE: The orientation of the edge is not employed by this
-					//implementation. It is a simple matter to compute it at
-					//this point as: Math.atan2(yGrad, xGrad);
-				} else {
-					magnitude[index] = 0;
+		//non-maximal suppression
+		for (int y = 1; y < height-1; y++)  {
+			for (int x = 1; x < width-1; x++) {
+				double angle = Math.atan2(yGrad[x][y], xGrad[x][y]);
+				//round to 0 deg
+				if ((angle >= 0 && angle < Math.PI/8) || (angle > 7*Math.PI/8 && angle < Math.PI)) {
+					if (!(mag[x][y] > mag[x][y+1] && mag[x][y] > mag[x][y-1])) mag[x][y] = 0;
 				}
-		 */
+				//round to 45 deg
+				if (angle >= Math.PI/8 || angle < 3*Math.PI/8) {
+					if (!(mag[x][y] > mag[x-1][y-1] && mag[x][y] > mag[x+1][y+1])) mag[x][y] = 0;
+				}
+				//round to 90 deg
+				if (angle >= 3*Math.PI/8 || angle < 5*Math.PI/8) {
+					if (!(mag[x][y] > mag[x+1][y] && mag[x][y] > mag[x-1][y])) mag[x][y] = 0;
+				}
+				//round to 135 deg
+				if (angle >= 5*Math.PI/8 || angle < 7*Math.PI/8) {
+					if (!(mag[x][y] > mag[x+1][y-1] && mag[x][y] > mag[x-1][y+1])) mag[x][y] = 0;
+				}
+			}
+		}
 	}
 	
 	private void hysteresis() {
 		
 	}
 	
-	private void threshold() {
+	private Bitmap threshold() {
+		Bitmap edges = Bitmap.createBitmap(width, height, outputImage.getConfig());
+		Bitmap finishedEdges = Bitmap.createBitmap(width, height, sourceImage.getConfig());
+		Paint paint = new Paint();
+		paint.setAlpha(100);
+		Canvas canvas = new Canvas(finishedEdges);
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				if (Color.red(outputImage.getPixel(x, y)) < 10) {
-					outputImage.setPixel(x, y, Color.BLACK);   //Color.TRANSPARENT
+				if (mag[x][y] < 7) {
+					mag[x][y] = 0;
 				}
+				if (mag[x][y] == 0) {
+					edges.setPixel(x, y, Color.WHITE); 
+				} else edges.setPixel(x, y, Color.TRANSPARENT);
 			}
 		}
+		canvas.drawBitmap(edges, 0, 0, paint);
+		return finishedEdges;
 	}
 	
 	private Bitmap restore(Bitmap shrunk) {
