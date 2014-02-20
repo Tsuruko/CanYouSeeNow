@@ -23,6 +23,8 @@ public class CannyEdgeDetector {
 
 	// statics
 	private final static int RESIZE = 200;
+	private final static float lowerThreshold = 20f;
+	private final static float upperThreshold = 1000f;
 
 	// fields
 	private int height, width;
@@ -36,23 +38,23 @@ public class CannyEdgeDetector {
 	//private float highThreshold;
 	
 	float [][] kernel;
-	float [][] mag;
+	float [][] output;
 	
 // constructors	
     //Constructs a new detector with default parameters.
 	public CannyEdgeDetector() {
 		//lowThreshold = 2.5f;
 		//highThreshold = 7.5f;
-		sigma = 2f;
-		blurRadius = 6;
+		sigma = 1f;
+		blurRadius = 4;
 	}
 	//Constructs a new detector with an image
 	public CannyEdgeDetector(Bitmap source) {
 		this.sourceImage = source;
 		//lowThreshold = 2.5f;
 		//highThreshold = 7.5f;
-		sigma = 2f;
-		blurRadius = 16;
+		sigma = 1f;
+		blurRadius = 6;
 	}
 	
 	public void setSourceImage(Bitmap m) {
@@ -65,6 +67,7 @@ public class CannyEdgeDetector {
 	public void findEdges() {
 		initialize();
 		outputImage = resize(sourceImage);
+		outputImage = changeContrastBrightness(outputImage, 10, 0);
 		outputImage = toGrayScale(outputImage);
 		outputImage = pad(outputImage, blurRadius);
 		outputImage = blur(outputImage);
@@ -122,6 +125,27 @@ public class CannyEdgeDetector {
 		return bmpGrayscale;
 	}
 	
+	private Bitmap changeContrastBrightness(Bitmap bmp, float contrast, float brightness)
+	{
+	    ColorMatrix cm = new ColorMatrix(new float[]
+	            {
+	                contrast, 0, 0, 0, brightness,
+	                0, contrast, 0, 0, brightness,
+	                0, 0, contrast, 0, brightness,
+	                0, 0, 0, 1, 0
+	            });
+
+	    Bitmap ret = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
+
+	    Canvas canvas = new Canvas(ret);
+
+	    Paint paint = new Paint();
+	    paint.setColorFilter(new ColorMatrixColorFilter(cm));
+	    canvas.drawBitmap(bmp, 0, 0, paint);
+
+	    return ret;
+	}
+	
 
 	private Bitmap pad(Bitmap gray, int padding) {
 		Bitmap pad = Bitmap.createBitmap(gray.getWidth()+padding, gray.getHeight()+padding, gray.getConfig());
@@ -158,7 +182,8 @@ public class CannyEdgeDetector {
 		
 		float [][] xGrad = new float[width][height];
 		float [][] yGrad = new float[width][height];
-		mag = new float[width][height];
+		float [][] mag = new float[width][height];
+		output = new float[width][height];
 		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -177,32 +202,115 @@ public class CannyEdgeDetector {
 		}
 		findGrad.recycle();
 
+		for (int i = 0; i < width; i++) {
+			output[i][0] = 0;
+			output[i][height-1] = 0;
+		}
+		for (int i = 0; i < height; i++) {
+			output[0][i] = 0;
+			output[width-1][0] = 0;
+		}
+		
 		//non-maximal suppression
 		for (int y = 1; y < height-1; y++)  {
 			for (int x = 1; x < width-1; x++) {
+				/*
+				int dx, dy;
+				if (xGrad[x][y] > 0) dx = 1;
+				else dx = -1;
+				if (yGrad[x][y] > 0) dy = 1;
+				else dy = -1;
+				
+				float a1, a2, b1, b2, A, B, point, val;
+				if (Math.abs(xGrad[x][y]) > Math.abs(yGrad[x][y])) {
+					a1 = mag[x+dx][y];
+					a2 = mag[x+dx][y-dy];
+					b1 = mag[x-dx][y];
+					b2 = mag[x-dx][y+dy];
+					A = (float) (Math.abs(xGrad[x][y]) - Math.abs(yGrad[x][y]))*a1 + Math.abs(yGrad[x][y])*a2;
+					B = (float) (Math.abs(xGrad[x][y]) - Math.abs(yGrad[x][y]))*b1 + Math.abs(yGrad[x][y])*b2;
+					point = mag[x][y] * Math.abs(xGrad[x][y]);
+					if (point >= A && point > B) {
+						val = Math.abs(xGrad[x][y]);
+						output[x][y] = 0xff000000 | ((int)(val) << 16 | (int)(val) << 8 | (int)(val));
+					} else {
+						val = 0;
+						output[x][y] = 0xff000000;
+					}
+				} else {
+					a1 = mag[x][y-dy];
+					a2 = mag[x+dx][y-dy];
+					b1 = mag[x][y+dy];
+					b2 = mag[x-dx][y+dy];						
+					A = (Math.abs(yGrad[x][y]) - Math.abs(xGrad[x][y]))*a1 + Math.abs(xGrad[x][y])*a2;
+					B = (Math.abs(yGrad[x][y]) - Math.abs(xGrad[x][y]))*b1 + Math.abs(xGrad[x][y])*b2;
+					point = mag[x][y] * Math.abs(yGrad[x][y]);
+					if(point >= A && point > B) {
+						val = Math.abs(yGrad[x][y]);
+						output[x][y] = 0xff000000 | ((int)(val) << 16 | (int)(val ) << 8 | (int)(val));
+					}
+					else {
+						val = 0;
+						output[x][y] = 0xff000000;
+					}							
+				}
+				*/
 				double angle = Math.atan2(yGrad[x][y], xGrad[x][y]);
 				//round to 0 deg
 				if ((angle >= 0 && angle < Math.PI/8) || (angle > 7*Math.PI/8 && angle < Math.PI)) {
-					if (!(mag[x][y] > mag[x][y+1] && mag[x][y] > mag[x][y-1])) mag[x][y] = 0;
+					if (!(mag[x][y] > mag[x][y+1] && mag[x][y] > mag[x][y-1])) output[x][y] = 0;
+					else output[x][y] = mag[x][y];
 				}
 				//round to 45 deg
 				if (angle >= Math.PI/8 || angle < 3*Math.PI/8) {
-					if (!(mag[x][y] > mag[x-1][y-1] && mag[x][y] > mag[x+1][y+1])) mag[x][y] = 0;
+					if (!(mag[x][y] > mag[x-1][y-1] && mag[x][y] > mag[x+1][y+1])) output[x][y] = 0;
+					else output[x][y] = mag[x][y];
 				}
 				//round to 90 deg
 				if (angle >= 3*Math.PI/8 || angle < 5*Math.PI/8) {
-					if (!(mag[x][y] > mag[x+1][y] && mag[x][y] > mag[x-1][y])) mag[x][y] = 0;
+					if (!(mag[x][y] > mag[x+1][y] && mag[x][y] > mag[x-1][y])) output[x][y] = 0;
+					else output[x][y] = mag[x][y];
 				}
 				//round to 135 deg
 				if (angle >= 5*Math.PI/8 || angle < 7*Math.PI/8) {
-					if (!(mag[x][y] > mag[x+1][y-1] && mag[x][y] > mag[x-1][y+1])) mag[x][y] = 0;
+					if (!(mag[x][y] > mag[x+1][y-1] && mag[x][y] > mag[x-1][y+1])) output[x][y] = 0;
+					else output[x][y] = mag[x][y];
 				}
 			}
 		}
 	}
 	
-	private void hysteresis() {
-		
+	private void hysteresis() {	
+		for(int x=0;x<width;x++) {
+			for(int y=0;y<height;y++) {
+				int value = ((int)output[x][y]) & 0xff; 
+				if (value >= upperThreshold) {
+					output[x][y] = 0xffffffff;
+					hystConnect(x, y);
+				}
+			}
+		}
+	}
+	
+	private void hystConnect(int x, int y) {
+		int value = 0;
+		for (int x1=x-1;x1<=x+1;x1++) {
+			for (int y1=y-1;y1<=y+1;y1++) {
+				if ((x1 < width) & (y1 < height) & (x1 >= 0) & (y1 >= 0) & (x1 != x) & (y1 != y)) {
+					value = ((int)output[x1][y1]) & 0xff;
+					if (value != 255) {
+						if (value >= lowerThreshold) {
+							output[x1][y1] = 0xffffffff;
+							hystConnect(x1, y1);
+						} 
+						else {
+							output[x1][y1] = 0xff000000;
+						}
+					}
+				}
+			}
+		}
+
 	}
 	
 	private Bitmap threshold() {
@@ -213,10 +321,10 @@ public class CannyEdgeDetector {
 		Canvas canvas = new Canvas(finishedEdges);
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				if (mag[x][y] < 7) {
-					mag[x][y] = 0;
+				if (output[x][y] < 7) {
+					output[x][y] = 0;
 				}
-				if (mag[x][y] == 0) {
+				if (output[x][y] == 0) {
 					edges.setPixel(x, y, Color.WHITE); 
 				} else edges.setPixel(x, y, Color.TRANSPARENT);
 			}
