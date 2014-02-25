@@ -9,7 +9,7 @@
  
 <resources>
 
-    <string name="app_name">SciFiApp</string>
+    <string name="app_name">CanYouSeeNow</string>
     <string name="action_settings">Settings</string>
     
     <string name="startButton">Start</string>
