@@ -8,7 +8,7 @@
  * Last Modified 2/10/14  -->
  
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="edu.ucsd.vis141.SciFiApp"
+    package="edu.ucsd.vis141.CanYouSeeNow"
     android:versionCode="1"
     android:versionName="1.0" >
     
@@ -24,7 +24,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <activity android:name="edu.ucsd.vis141.SciFiApp.StartScreenActivity"
+        <activity android:name="edu.ucsd.vis141.CanYouSeeNow.StartScreenActivity"
             	  android:label="@string/app_name" >   
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,7 +33,7 @@
         </activity>
         
         <activity
-            android:name="edu.ucsd.vis141.SciFiApp.CameraActivity"
+            android:name="edu.ucsd.vis141.CanYouSeeNow.CameraActivity"
             android:screenOrientation="landscape">
         </activity>
         

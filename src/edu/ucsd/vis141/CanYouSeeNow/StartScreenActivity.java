@@ -1,4 +1,4 @@
-package edu.ucsd.vis141.SciFiApp;
+package edu.ucsd.vis141.CanYouSeeNow;
 
 import android.app.Activity;
 import android.content.Intent;

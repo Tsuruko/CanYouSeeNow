@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package edu.ucsd.vis141.SciFiApp;
+package edu.ucsd.vis141.CanYouSeeNow;
 
 public final class R {
     public static final class attr {

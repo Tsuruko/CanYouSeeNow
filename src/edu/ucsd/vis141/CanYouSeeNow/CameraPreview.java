@@ -12,7 +12,7 @@
  *   
  ********************************/
 
-package edu.ucsd.vis141.SciFiApp;
+package edu.ucsd.vis141.CanYouSeeNow;
 
 import java.io.IOException;
 import android.content.Context;

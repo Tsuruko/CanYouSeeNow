@@ -1,4 +1,4 @@
-package edu.ucsd.vis141.SciFiApp;
+package edu.ucsd.vis141.CanYouSeeNow;
 
 import android.content.Context;
 import android.graphics.Canvas;
