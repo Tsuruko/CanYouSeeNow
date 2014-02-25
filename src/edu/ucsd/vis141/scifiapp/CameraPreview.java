@@ -12,7 +12,7 @@
  *   
  ********************************/
 
-package edu.ucsd.vis141.scifiapp;
+package edu.ucsd.vis141.SciFiApp;
 
 import java.io.IOException;
 import android.content.Context;

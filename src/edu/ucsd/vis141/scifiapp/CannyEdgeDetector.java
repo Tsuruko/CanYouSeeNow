@@ -1,4 +1,4 @@
-package edu.ucsd.vis141.scifiapp;
+package edu.ucsd.vis141.SciFiApp;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
