@@ -33,9 +33,9 @@ public final class R {
     }
     public static final class integer {
         public static final int blur=0x7f050001;
-        public static final int other=0x7f050002;
-        public static final int otherr=0x7f050003;
-        public static final int regular=0x7f050000;
+        public static final int dark=0x7f050002;
+        public static final int darkBlur=0x7f050003;
+        public static final int reset=0x7f050000;
     }
     public static final class layout {
         public static final int activity_camera=0x7f030000;

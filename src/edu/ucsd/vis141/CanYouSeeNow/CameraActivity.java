@@ -100,7 +100,7 @@ public class CameraActivity extends Activity {
 	};
 	
 	 public void modeSwitch1(View view) {
-		 DataHolder.getInstance().setMode(R.integer.regular);
+		 DataHolder.getInstance().setMode(R.integer.reset);
 	 }
 
 	 public void modeSwitch2(View view) {
@@ -108,11 +108,11 @@ public class CameraActivity extends Activity {
 	 }
 	 
 	 public void modeSwitch3(View view) {
-		 DataHolder.getInstance().setMode(R.integer.other);
+		 DataHolder.getInstance().setMode(R.integer.dark);
 	 }
 	 
 	 public void modeSwitch4(View view) {
-		 DataHolder.getInstance().setMode(R.integer.otherr); 
+		 DataHolder.getInstance().setMode(R.integer.darkBlur); 
 	 }
 	 
 }

@@ -44,7 +44,7 @@ public class DataHolder {
 	}
 	
 	public void setMode(int i) {
-		if (i == R.integer.blur || i == R.integer.regular || i == R.integer.other || i == R.integer.otherr) {
+		if (i == R.integer.blur || i == R.integer.reset || i == R.integer.dark || i == R.integer.darkBlur) {
 			mode = i;
 		}
 	}

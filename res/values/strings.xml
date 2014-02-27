@@ -17,9 +17,9 @@
     <string name="hw">Hello World</string>
     <string name="takePic">Frame Taken</string>
     
-    <string name="b1">regular</string>
+    <string name="b1">reset</string>
     <string name="b2">blur</string>
-    <string name="b3">other</string>
-    <string name="b4">otherr</string>
+    <string name="b3">dark</string>
+    <string name="b4">combo</string>
 
 </resources>

@@ -78,7 +78,7 @@ public class CannyEdgeDetector {
 			outputImage = pad(outputImage, blurRadius);
 			outputImage = blur(outputImage);
 		}
-		outputImage = transparency(outputImage);
+		if (DataHolder.getInstance().getMode() != R.integer.dark) outputImage = transparency(outputImage);
 		outputImage = restore(outputImage);
 		writeData();
 	}
@@ -321,10 +321,16 @@ public class CannyEdgeDetector {
 	private Bitmap fill() {
 		Bitmap edges = Bitmap.createBitmap(width, height, outputImage.getConfig());
 		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				if (output[x][y] == 0) {
-					edges.setPixel(x, y, Color.WHITE); 
-				} else edges.setPixel(x, y, Color.BLACK);
+			for (int x = 0; x < width; x++) {	
+				if (DataHolder.getInstance().getMode() == R.integer.dark) {
+					if (output[x][y] == 0) {
+						edges.setPixel(x, y, Color.BLACK); 
+					} else edges.setPixel(x, y, Color.WHITE);
+				} else {
+					if (output[x][y] == 0) {
+						edges.setPixel(x, y, Color.WHITE); 
+					} else edges.setPixel(x, y, Color.BLACK);
+				}
 			}
 		}
 		return edges;
