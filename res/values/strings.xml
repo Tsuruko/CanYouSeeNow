@@ -19,7 +19,7 @@
     
     <string name="b1">regular</string>
     <string name="b2">blur</string>
-    <string name="b3">\?\?\?</string>
-    <string name="b4">\?\?\?</string>
+    <string name="b3">other</string>
+    <string name="b4">otherr</string>
 
 </resources>

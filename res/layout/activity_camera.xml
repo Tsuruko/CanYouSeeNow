@@ -18,10 +18,10 @@
     <FrameLayout
       android:id="@+id/camera_preview"
       android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+      android:layout_height="fill_parent"
     >
-
     </FrameLayout>
+    
 <!--  
     <ImageView
         android:id="@+id/imageView1"
@@ -33,26 +33,26 @@
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
         android:onClick="modeSwitch1"
         android:text="@string/b1" />
-
-    <Button
+    
+        <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/button1"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/button1"
         android:onClick="modeSwitch2"
         android:text="@string/b2" />
-    
+
     <Button
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/button4"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/button2"
         android:onClick="modeSwitch3"
         android:text="@string/b3" />
 
@@ -60,8 +60,8 @@
         android:id="@+id/button4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_below="@+id/button3"
         android:onClick="modeSwitch4"
         android:text="@string/b4" />
 
