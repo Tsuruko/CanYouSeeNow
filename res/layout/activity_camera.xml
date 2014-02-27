@@ -7,19 +7,62 @@
  * Created By: Monica Liu
  * Last Modified 2/10/14  -->
  
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:baselineAligned="false"
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     tools:context=".CameraActivity" >
-    
-  <FrameLayout
-    android:id="@+id/camera_preview"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    />
-    
 
-</LinearLayout>
+    <FrameLayout
+      android:id="@+id/camera_preview"
+      android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+    </FrameLayout>
+<!--  
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+      -->
+    
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:onClick="modeSwitch1"
+        android:text="@string/b1" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/button1"
+        android:onClick="modeSwitch2"
+        android:text="@string/b2" />
+    
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/button4"
+        android:onClick="modeSwitch3"
+        android:text="@string/b3" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:onClick="modeSwitch4"
+        android:text="@string/b4" />
+
+</RelativeLayout>

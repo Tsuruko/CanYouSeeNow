@@ -20,6 +20,7 @@ public class DataHolder {
 	
 	private Bitmap drawing;
 	private boolean status = false;
+	private int mode = 0;
 	
 	public Bitmap getBitmap() {
 		return drawing;
@@ -36,6 +37,16 @@ public class DataHolder {
 	
 	public void setStatus() {
 		if (drawing != null) status = true;
+	}
+	
+	public int getMode() {
+		return mode;
+	}
+	
+	public void setMode(int i) {
+		if (i == R.integer.blur || i == R.integer.regular || i == R.integer.other || i == R.integer.otherr) {
+			mode = i;
+		}
 	}
 	
 	//static declarations forcing one instance of this class

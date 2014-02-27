@@ -73,7 +73,12 @@ public class CannyEdgeDetector {
 		outputImage = blur(outputImage);
 		computeGradients(outputImage);
 		hysteresis();
-		outputImage = threshold();
+		outputImage = fill();
+		if (DataHolder.getInstance().getMode() == R.integer.blur) {
+			outputImage = pad(outputImage, blurRadius);
+			outputImage = blur(outputImage);
+		}
+		outputImage = transparency(outputImage);
 		outputImage = restore(outputImage);
 		writeData();
 	}
@@ -313,22 +318,23 @@ public class CannyEdgeDetector {
 
 	}
 	
-	private Bitmap threshold() {
+	private Bitmap fill() {
 		Bitmap edges = Bitmap.createBitmap(width, height, outputImage.getConfig());
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (output[x][y] == 0) {
+					edges.setPixel(x, y, Color.WHITE); 
+				} else edges.setPixel(x, y, Color.BLACK);
+			}
+		}
+		return edges;
+	}
+	
+	private Bitmap transparency(Bitmap edges) {
 		Bitmap finishedEdges = Bitmap.createBitmap(width, height, sourceImage.getConfig());
 		Paint paint = new Paint();
 		paint.setAlpha(100);
 		Canvas canvas = new Canvas(finishedEdges);
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				if (output[x][y] < 7) {
-					output[x][y] = 0;
-				}
-				if (output[x][y] == 0) {
-					edges.setPixel(x, y, Color.WHITE); 
-				} else edges.setPixel(x, y, Color.TRANSPARENT);
-			}
-		}
 		canvas.drawBitmap(edges, 0, 0, paint);
 		return finishedEdges;
 	}

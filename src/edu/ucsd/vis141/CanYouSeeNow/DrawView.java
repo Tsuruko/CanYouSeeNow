@@ -1,7 +1,9 @@
 package edu.ucsd.vis141.CanYouSeeNow;
 
 import android.content.Context;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.view.SurfaceView;
 
@@ -28,7 +30,6 @@ public class DrawView extends SurfaceView{
 
 	@Override
 	protected void onDraw(Canvas canvas){
-		canvas.drawColor(0, Mode.CLEAR);
 		if (DataHolder.getInstance().getStatus()) canvas.drawBitmap(DataHolder.getInstance().getBitmap(), 0, 0, null);
 	}
 	

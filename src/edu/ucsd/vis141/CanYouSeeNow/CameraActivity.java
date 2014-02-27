@@ -10,6 +10,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 /*********************************
  * UCSD VIS 141A project
@@ -32,6 +33,7 @@ public class CameraActivity extends Activity {
 	private CameraPreview mPreview;
 	private DrawView detectEdge;
 	Timer timer = new Timer();
+	private ImageView overlay;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class CameraActivity extends Activity {
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
         detectEdge = new DrawView(this);
+        //overlay = (ImageView) findViewById(R.id.imageView1);
         
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
@@ -89,9 +92,27 @@ public class CameraActivity extends Activity {
 				public void run() {
 					//continuously refresh the drawview surface
 					detectEdge.invalidate();
+					//overlay.setImageBitmap(DataHolder.getInstance().getBitmap());
+					//overlay.invalidate();
 				}
 			});	
 		}
 	};
 	
+	 public void modeSwitch1(View view) {
+		 DataHolder.getInstance().setMode(R.integer.regular);
+	 }
+
+	 public void modeSwitch2(View view) {
+		 DataHolder.getInstance().setMode(R.integer.blur);
+	 }
+	 
+	 public void modeSwitch3(View view) {
+		 DataHolder.getInstance().setMode(R.integer.other);
+	 }
+	 
+	 public void modeSwitch4(View view) {
+		 DataHolder.getInstance().setMode(R.integer.otherr); 
+	 }
+	 
 }
