@@ -23,7 +23,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-/** A basic Camera preview class */
+/** A basic Camera preview class, based on the one in the anroid tutorials */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
 	
     private static final String TAG = null;
@@ -49,7 +49,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mHolder = getHolder();
         mHolder.addCallback(this);
         
-        // deprecated setting, but required on Android versions prior to 3.0
+        // deprecated setting, but required on Android versions prior to 3.0.  Check api version to see
+        //if needed
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
         	getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
@@ -113,13 +114,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             if (size == null) return;
             
     		if (count > 1) {
-    			//take pic and analyze
+    			//take picture frame and convert to usable bitmap
     			int h = camera.getParameters().getPreviewSize().height;
     			int w = camera.getParameters().getPreviewSize().width;
     			
     			int[] rgb = decodeYUV420SP(data, w, h);
                 sourceFrame = Bitmap.createBitmap(rgb, w, h, Bitmap.Config.ARGB_8888);
     			
+                //detect edges on the bitmap
     			detector.setSourceImage(sourceFrame);
     			detector.findEdges();
     			//sourceFrame.recycle();
@@ -131,7 +133,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     };
     
     public int[] decodeYUV420SP( byte[] yuv420sp, int width, int height) {   
-
+    	//decodeYUV420SP code found on the android forums.  changes yuv format to rfb format 
         final int frameSize = width * height;   
 
         int rgb[]=new int[width*height];   

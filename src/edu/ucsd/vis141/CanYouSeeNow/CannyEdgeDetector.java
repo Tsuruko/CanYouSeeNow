@@ -48,6 +48,7 @@ public class CannyEdgeDetector {
 		sigma = 1f;
 		blurRadius = 4;
 	}
+	
 	//Constructs a new detector with an image
 	public CannyEdgeDetector(Bitmap source) {
 		this.sourceImage = source;
@@ -57,6 +58,7 @@ public class CannyEdgeDetector {
 		blurRadius = 6;
 	}
 	
+	//change source bitmap
 	public void setSourceImage(Bitmap m) {
 		if (sourceImage == null) sourceImage = m;
 		else {
@@ -64,7 +66,12 @@ public class CannyEdgeDetector {
 			sourceImage = m;
 		}
 	}
+	
+	//public function called to perform calculations on inputed bitmap source
 	public void findEdges() {
+		
+		//if no source image is set don't calculate
+		if (sourceImage == null) return;
 		initialize();
 		outputImage = resize(sourceImage);
 		outputImage = changeContrastBrightness(outputImage, 10, 0);
@@ -74,19 +81,30 @@ public class CannyEdgeDetector {
 		computeGradients(outputImage);
 		hysteresis();
 		outputImage = fill();
-		if (DataHolder.getInstance().getMode() == R.integer.blur || 
-				DataHolder.getInstance().getMode() == R.integer.darkBlur) {
+		int check = DataHolder.getInstance().getMode() % 4;
+		if (check == DataHolder.BLUR || check == DataHolder.BLUR_TRANS) {
 			outputImage = pad(outputImage, blurRadius);
 			outputImage = blur(outputImage);
 		}
-		if (DataHolder.getInstance().getMode() != R.integer.dark && 
-				DataHolder.getInstance().getMode() != R.integer.darkBlur) outputImage = transparency(outputImage);
+		if (check == DataHolder.TRANS || check == DataHolder.BLUR_TRANS) outputImage = transparency(outputImage);
 		outputImage = restore(outputImage);
 		writeData();
 	}
 	
+	/* private functions used only by this class for calculations
+	 * resize(), changeContrastBrightness(), toGrayScale, and pad() are all functions to
+	 * prep the image for edge detection.
+	 * 
+	 * blur(), computeGradients(), and hysteresis() are part of the canny edge detector algorithm
+	 * 
+	 * fill(), restore(), and writeData() create the new bitmap to be returned
+	 * 
+	 * blur() (and pad() to prep the image for blurring), and transparency() are used to manipulate the 
+	 * bitmap into a certain type of overlay for display
+	 */
+	
 	private void makeKernel(int radius) {
-		//create the gaussian filter kernel
+		//create the gaussian filter kernel for removing noise
 		kernel = new float [radius][radius];
 		float sum = 0;
 		for (int y = 0; y < radius; y++) {
@@ -105,6 +123,7 @@ public class CannyEdgeDetector {
 	}
 	
 	private void initialize() {
+		//set variables that depend on the source image
 		originW = sourceImage.getWidth();
 		originH = sourceImage.getHeight();
 		makeKernel(blurRadius);
@@ -112,6 +131,9 @@ public class CannyEdgeDetector {
 	
 	
 	private Bitmap resize(Bitmap origin) {
+		/* shrink the bitmap to RESIZE width with matching ratio for height, bitmaps bigger than this
+		 * value will be calcuated too slowly */
+		
 		int w = origin.getWidth();
 		ratio = w/RESIZE;
 		Bitmap resized = Bitmap.createScaledBitmap(origin, RESIZE, origin.getHeight()/ratio, true);
@@ -121,6 +143,7 @@ public class CannyEdgeDetector {
 	}
 	
 	private Bitmap toGrayScale(Bitmap bmpOriginal) {
+		//no need for color images to find edges, set to grayscale for simpler calculations
 		Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 		Canvas c = new Canvas(bmpGrayscale);
 		Paint paint = new Paint();
@@ -134,6 +157,7 @@ public class CannyEdgeDetector {
 	
 	private Bitmap changeContrastBrightness(Bitmap bmp, float contrast, float brightness)
 	{
+		//increase contrast/brightness using a matrix to simplify the image
 	    ColorMatrix cm = new ColorMatrix(new float[]
 	            {
 	                contrast, 0, 0, 0, brightness,
@@ -155,6 +179,7 @@ public class CannyEdgeDetector {
 	
 
 	private Bitmap pad(Bitmap gray, int padding) {
+		//add padding to the image to make up for any edge pixels of a bitmap lost during a calculation
 		Bitmap pad = Bitmap.createBitmap(gray.getWidth()+padding, gray.getHeight()+padding, gray.getConfig());
 		Canvas c = new Canvas(pad);
 		c.drawBitmap(gray, 0, 0, null);
@@ -179,6 +204,7 @@ public class CannyEdgeDetector {
 	}
 	
 	private void computeGradients(Bitmap blurred) { 
+		//pad the image in order to use sorbel to find intensity gradients
 		Bitmap findGrad = pad(blurred, 3);
 		float [][] sorbelX = new float[][]{ {-1, 0, 1},
 				                            {-2, 0, 2},
@@ -209,6 +235,7 @@ public class CannyEdgeDetector {
 		}
 		findGrad.recycle();
 
+		//fill in the lost pixels with 0
 		for (int i = 0; i < width; i++) {
 			output[i][0] = 0;
 			output[i][height-1] = 0;
@@ -221,47 +248,9 @@ public class CannyEdgeDetector {
 		//non-maximal suppression
 		for (int y = 1; y < height-1; y++)  {
 			for (int x = 1; x < width-1; x++) {
-				/*
-				int dx, dy;
-				if (xGrad[x][y] > 0) dx = 1;
-				else dx = -1;
-				if (yGrad[x][y] > 0) dy = 1;
-				else dy = -1;
 				
-				float a1, a2, b1, b2, A, B, point, val;
-				if (Math.abs(xGrad[x][y]) > Math.abs(yGrad[x][y])) {
-					a1 = mag[x+dx][y];
-					a2 = mag[x+dx][y-dy];
-					b1 = mag[x-dx][y];
-					b2 = mag[x-dx][y+dy];
-					A = (float) (Math.abs(xGrad[x][y]) - Math.abs(yGrad[x][y]))*a1 + Math.abs(yGrad[x][y])*a2;
-					B = (float) (Math.abs(xGrad[x][y]) - Math.abs(yGrad[x][y]))*b1 + Math.abs(yGrad[x][y])*b2;
-					point = mag[x][y] * Math.abs(xGrad[x][y]);
-					if (point >= A && point > B) {
-						val = Math.abs(xGrad[x][y]);
-						output[x][y] = 0xff000000 | ((int)(val) << 16 | (int)(val) << 8 | (int)(val));
-					} else {
-						val = 0;
-						output[x][y] = 0xff000000;
-					}
-				} else {
-					a1 = mag[x][y-dy];
-					a2 = mag[x+dx][y-dy];
-					b1 = mag[x][y+dy];
-					b2 = mag[x-dx][y+dy];						
-					A = (Math.abs(yGrad[x][y]) - Math.abs(xGrad[x][y]))*a1 + Math.abs(xGrad[x][y])*a2;
-					B = (Math.abs(yGrad[x][y]) - Math.abs(xGrad[x][y]))*b1 + Math.abs(xGrad[x][y])*b2;
-					point = mag[x][y] * Math.abs(yGrad[x][y]);
-					if(point >= A && point > B) {
-						val = Math.abs(yGrad[x][y]);
-						output[x][y] = 0xff000000 | ((int)(val) << 16 | (int)(val ) << 8 | (int)(val));
-					}
-					else {
-						val = 0;
-						output[x][y] = 0xff000000;
-					}							
-				}
-				*/
+				//see http://en.wikipedia.org/wiki/Canny_edge_detector for explanation of angle searching
+				
 				double angle = Math.atan2(yGrad[x][y], xGrad[x][y]);
 				//round to 0 deg
 				if ((angle >= 0 && angle < Math.PI/8) || (angle > 7*Math.PI/8 && angle < Math.PI)) {
@@ -288,6 +277,7 @@ public class CannyEdgeDetector {
 	}
 	
 	private void hysteresis() {	
+		//perform hysteresis thresholding
 		for(int x=0;x<width;x++) {
 			for(int y=0;y<height;y++) {
 				int value = ((int)output[x][y]) & 0xff; 
@@ -300,6 +290,7 @@ public class CannyEdgeDetector {
 	}
 	
 	private void hystConnect(int x, int y) {
+		//helper function
 		int value = 0;
 		for (int x1=x-1;x1<=x+1;x1++) {
 			for (int y1=y-1;y1<=y+1;y1++) {
@@ -321,10 +312,11 @@ public class CannyEdgeDetector {
 	}
 	
 	private Bitmap fill() {
+		//create a new bitmap of the final edges
 		Bitmap edges = Bitmap.createBitmap(width, height, outputImage.getConfig());
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {	
-				if (DataHolder.getInstance().getMode() == R.integer.dark || DataHolder.getInstance().getMode() == R.integer.darkBlur) {
+				if (DataHolder.getInstance().getMode() >= DataHolder.DARK) {
 					if (output[x][y] == 0) {
 						edges.setPixel(x, y, Color.BLACK); 
 					} else edges.setPixel(x, y, Color.WHITE);
@@ -339,6 +331,7 @@ public class CannyEdgeDetector {
 	}
 	
 	private Bitmap transparency(Bitmap edges) {
+		//change the canvas alpha to create transparency in the bitmap
 		Bitmap finishedEdges = Bitmap.createBitmap(width, height, sourceImage.getConfig());
 		Paint paint = new Paint();
 		paint.setAlpha(100);
@@ -348,11 +341,13 @@ public class CannyEdgeDetector {
 	}
 	
 	private Bitmap restore(Bitmap shrunk) {
+		//restore the shrunk bitmap to its original size
 		Bitmap resized = Bitmap.createScaledBitmap(shrunk, originW, originH, true);
 		return resized;	
 	}
 	
 	private void writeData() {
+		//write the bitmap information to the global singleton which holds the activity data
 		DataHolder.getInstance().setBitmap(outputImage);
 		DataHolder.getInstance().setStatus();
 		//sourceImage.recycle();

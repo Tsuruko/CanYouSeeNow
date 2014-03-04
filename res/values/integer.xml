@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    
-    <integer name="reset">0</integer>
-    <integer name="blur">1</integer>
-    <integer name="dark">2</integer>
-    <integer name="darkBlur">3</integer>
-    
-</resources>

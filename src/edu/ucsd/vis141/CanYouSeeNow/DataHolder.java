@@ -18,9 +18,20 @@ import android.graphics.Bitmap;
 
 public class DataHolder {
 	
+	//static constants for determining overlay mode
+	public final static int LIGHT = 0;
+	public final static int TRANS = 1;
+	public final static int BLUR = 2;
+	public final static int BLUR_TRANS = 3;
+	public final static int DARK = 4;
+	public final static int DARK_TRANS = 5;
+	public final static int DARK_BLUR = 6;
+	public final static int DARK_BLUR_TRANS = 7;
+	
+	//data values which need to have only one instance and be viewed from all classes across the application
 	private Bitmap drawing;
 	private boolean status = false;
-	private int mode = 0;
+	private int mode = 1;
 	
 	public Bitmap getBitmap() {
 		return drawing;
@@ -44,9 +55,7 @@ public class DataHolder {
 	}
 	
 	public void setMode(int i) {
-		if (i == R.integer.blur || i == R.integer.reset || i == R.integer.dark || i == R.integer.darkBlur) {
-			mode = i;
-		}
+		if (i <= DARK_BLUR_TRANS) mode = i;
 	}
 	
 	//static declarations forcing one instance of this class

@@ -40,6 +40,9 @@ public class CameraActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
 		
+		/*if the api level of the device permits, hide any status bars and action bars to make a bigger
+		 * camera preview area
+		 */	
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			View decorView = getWindow().getDecorView();
 			//Hide the status bar
@@ -99,20 +102,29 @@ public class CameraActivity extends Activity {
 		}
 	};
 	
+	//change viewing mode, one switch per button
 	 public void modeSwitch1(View view) {
-		 DataHolder.getInstance().setMode(R.integer.reset);
+		 DataHolder.getInstance().setMode(DataHolder.TRANS);
 	 }
 
 	 public void modeSwitch2(View view) {
-		 DataHolder.getInstance().setMode(R.integer.blur);
+		 int check = DataHolder.getInstance().getMode() % 4;
+		 if (check != DataHolder.BLUR && check != DataHolder.BLUR_TRANS) {
+			 DataHolder.getInstance().setMode(DataHolder.getInstance().getMode() + 2 );
+		 } else DataHolder.getInstance().setMode(DataHolder.getInstance().getMode() - 2 );
 	 }
 	 
 	 public void modeSwitch3(View view) {
-		 DataHolder.getInstance().setMode(R.integer.dark);
+		 if (DataHolder.getInstance().getMode() < DataHolder.DARK) {
+			   DataHolder.getInstance().setMode(DataHolder.getInstance().getMode() +4);
+			 } else DataHolder.getInstance().setMode(DataHolder.getInstance().getMode() -4);
 	 }
 	 
 	 public void modeSwitch4(View view) {
-		 DataHolder.getInstance().setMode(R.integer.darkBlur); 
+		 int check = DataHolder.getInstance().getMode() % 4;
+		 if (check != DataHolder.TRANS && check != DataHolder.BLUR_TRANS) {
+			 DataHolder.getInstance().setMode(DataHolder.getInstance().getMode() + 1);
+		 } else DataHolder.getInstance().setMode(DataHolder.getInstance().getMode() - 1);
 	 }
 	 
 }

@@ -20,6 +20,6 @@
     <string name="b1">reset</string>
     <string name="b2">blur</string>
     <string name="b3">dark</string>
-    <string name="b4">combo</string>
+    <string name="b4">trans</string>
 
 </resources>
