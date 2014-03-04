@@ -7,7 +7,7 @@
  * 
  * CameraPreview.java:
  *   A SurfaceView/SurfaceHolder callback for holding the camera preview
- *   Takes a pictures every 10 preview frame updates and uses it to find edges
+ *   Saves a preview frame and passes it to a CannyEdgeDetector object to find the edges
  *   in the environment
  *   
  ********************************/

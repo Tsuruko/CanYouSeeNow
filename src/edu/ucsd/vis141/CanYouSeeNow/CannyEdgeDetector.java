@@ -16,6 +16,9 @@ import android.graphics.Paint;
  * 
  * CannyEdgeDetector.java: 
  *   An implementation of a canny edge detector on bitmaps.
+ *   End manipulation of the black and white edge bitmap depending on app display mode.
+ *   
+ *   Call FindEdges() to have the object perform calculations on the source image.
  *   
  ********************************/
 

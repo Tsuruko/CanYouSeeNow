@@ -14,6 +14,8 @@ import android.graphics.Bitmap;
  *   what elements the DrawView should draw.  The information is set
  *   from the camera's preview callback and used to draw the overlay.
  *   
+ *   Also holds the static constants used to determine display mode for the bitmap overlay
+ *   
  ********************************/
 
 public class DataHolder {
