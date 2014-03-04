@@ -12,7 +12,7 @@ import android.graphics.Paint;
  * SciFiAPP
  * 
  * Created By: Monica Liu
- * Last Modified 2/10/14
+ * Last Modified 3/03/14
  * 
  * CannyEdgeDetector.java: 
  *   An implementation of a canny edge detector on bitmaps.

@@ -7,7 +7,7 @@ import android.graphics.Bitmap;
  * SciFiAPP
  * 
  * Created By: Monica Liu
- * Last Modified 2/10/14
+ * Last Modified 3/03/14
  * 
  * DataHolder.java:
  *   Global Singleton Class for holding information regarding

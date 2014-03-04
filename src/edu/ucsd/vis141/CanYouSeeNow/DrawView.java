@@ -12,11 +12,13 @@ import android.view.SurfaceView;
  * SciFiAPP
  * 
  * Created By: Monica Liu
- * Last Modified 2/10/14
+ * Last Modified 3/03/14
  * 
  * DrawView.java:
  *   A drawview class used to overlay the sufaceview holding the camera preview.
  *   The edges found in the image are drawn on this view using canvas and paint.
+ *   
+ *   Note: possibly use a imageView instead of this class
  *   
  ********************************/
 

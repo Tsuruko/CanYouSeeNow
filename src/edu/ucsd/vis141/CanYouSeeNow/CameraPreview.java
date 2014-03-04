@@ -3,7 +3,7 @@
  * SciFiAPP
  * 
  * Created By: Monica Liu
- * Last Modified 2/10/14
+ * Last Modified 3/03/14
  * 
  * CameraPreview.java:
  *   A SurfaceView/SurfaceHolder callback for holding the camera preview

@@ -17,7 +17,7 @@ import android.widget.ImageView;
  * SciFiAPP
  * 
  * Created By: Monica Liu
- * Last Modified 2/10/14
+ * Last Modified 3/03/14
  * 
  * CameraActivity.java
  *   Main Activity holding the camera display. Constantly updates the
@@ -33,7 +33,7 @@ public class CameraActivity extends Activity {
 	private CameraPreview mPreview;
 	private DrawView detectEdge;
 	Timer timer = new Timer();
-	private ImageView overlay;
+	//private ImageView overlay;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +58,7 @@ public class CameraActivity extends Activity {
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
         detectEdge = new DrawView(this);
+        
         //overlay = (ImageView) findViewById(R.id.imageView1);
         
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
@@ -95,6 +96,8 @@ public class CameraActivity extends Activity {
 				public void run() {
 					//continuously refresh the drawview surface
 					detectEdge.invalidate();
+					
+					
 					//overlay.setImageBitmap(DataHolder.getInstance().getBitmap());
 					//overlay.invalidate();
 				}
