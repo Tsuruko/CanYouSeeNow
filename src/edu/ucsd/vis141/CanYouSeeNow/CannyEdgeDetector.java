@@ -88,7 +88,8 @@ public class CannyEdgeDetector {
 		if (check == DataHolder.BLUR || check == DataHolder.BLUR_TRANS) {
 			outputImage = blur(outputImage);
 		}
-		if (check == DataHolder.TRANS || check == DataHolder.BLUR_TRANS) outputImage = transparency(outputImage);
+		if ((check == DataHolder.TRANS || check == DataHolder.BLUR_TRANS) && (!DataHolder.getInstance().getImageMode())) 
+				outputImage = transparency(outputImage);
 		outputImage = restore(outputImage);
 		writeData();
 	}
@@ -322,15 +323,20 @@ public class CannyEdgeDetector {
 	private Bitmap fill() {
 		//create a new bitmap of the final edges
 		Bitmap edges = Bitmap.createBitmap(width, height, outputImage.getConfig());
+		sourceImage = resize(sourceImage);
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {	
 				if (DataHolder.getInstance().getMode() >= DataHolder.DARK) {
 					if (output[x][y] == 0) {
-						edges.setPixel(x, y, Color.BLACK); 
+						if (DataHolder.getInstance().getImageMode()) {
+							edges.setPixel(x, y, sourceImage.getPixel(x, y));
+						} else edges.setPixel(x, y, Color.BLACK); 
 					} else edges.setPixel(x, y, Color.WHITE);
 				} else {
 					if (output[x][y] == 0) {
-						edges.setPixel(x, y, Color.WHITE); 
+						if (DataHolder.getInstance().getImageMode()) {
+							edges.setPixel(x, y, sourceImage.getPixel(x, y));
+						} else edges.setPixel(x, y, Color.WHITE); 
 					} else edges.setPixel(x, y, Color.BLACK);
 				}
 			}

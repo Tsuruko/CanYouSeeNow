@@ -32,7 +32,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private int count = 0;
     private Bitmap sourceFrame;
     CannyEdgeDetector detector = new CannyEdgeDetector();
-
+    
     //default constructor
     public CameraPreview(Context context) {
     	super(context);
@@ -124,6 +124,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 //detect edges on the bitmap
     			detector.setSourceImage(sourceFrame);
     			detector.findEdges();
+    			
+    				
     			//sourceFrame.recycle();
     			count = 0;
     		} else {

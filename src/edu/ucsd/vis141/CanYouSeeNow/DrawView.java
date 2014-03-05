@@ -32,7 +32,6 @@ public class DrawView extends SurfaceView{
 
 	@Override
 	protected void onDraw(Canvas canvas){
-		if (DataHolder.getInstance().getImageMode()) canvas.drawBitmap(DataHolder.getInstance().getImgBitmap(), 0, 0, null);
 		if (DataHolder.getInstance().getStatus()) canvas.drawBitmap(DataHolder.getInstance().getBitmap(), 0, 0, null);
 	}
 	

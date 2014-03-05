@@ -32,9 +32,8 @@ public class DataHolder {
 	
 	//data values which need to have only one instance and be viewed from all classes across the application
 	private Bitmap drawing;
-	private Bitmap img;
 	private boolean status = false;
-	private int mode = 1;
+	private int mode = TRANS;
 	private boolean imgMode = false;
 	
 	public Bitmap getBitmap() {
@@ -43,13 +42,6 @@ public class DataHolder {
 	public void setBitmap(Bitmap m) {
 		//drawing.recycle();
 		drawing = m;
-	}
-	
-	public Bitmap getImgBitmap() {
-		return img;
-	}
-	public void setImgBitmap(Bitmap m) {
-		img = m;
 	}
 	
 	public boolean getStatus() {
