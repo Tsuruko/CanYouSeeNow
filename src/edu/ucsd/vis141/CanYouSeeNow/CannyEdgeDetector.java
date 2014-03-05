@@ -59,7 +59,7 @@ public class CannyEdgeDetector {
 		//lowThreshold = 2.5f;
 		//highThreshold = 7.5f;
 		sigma = 1f;
-		blurRadius = 6;
+		blurRadius = 4;
 	}
 	
 	//change source bitmap
@@ -187,7 +187,7 @@ public class CannyEdgeDetector {
 		return pad;
 	}
 	
-	public Bitmap blur(Bitmap in) {
+	private Bitmap blur(Bitmap in) {
 		//pad the image
 		Bitmap pad = pad(in, blurRadius);
 		
