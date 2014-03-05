@@ -80,14 +80,12 @@ public class CannyEdgeDetector {
 		outputImage = resize(sourceImage);
 		outputImage = changeContrastBrightness(outputImage, 10, 0);
 		outputImage = toGrayScale(outputImage);
-		outputImage = pad(outputImage, blurRadius);
 		outputImage = blur(outputImage);
 		computeGradients(outputImage);
 		hysteresis();
 		outputImage = fill();
 		int check = DataHolder.getInstance().getMode() % 4;
 		if (check == DataHolder.BLUR || check == DataHolder.BLUR_TRANS) {
-			outputImage = pad(outputImage, blurRadius);
 			outputImage = blur(outputImage);
 		}
 		if (check == DataHolder.TRANS || check == DataHolder.BLUR_TRANS) outputImage = transparency(outputImage);
@@ -180,7 +178,7 @@ public class CannyEdgeDetector {
 	    return ret;
 	}
 	
-
+	//helper function to add padding to bitmap for lost pixels
 	private Bitmap pad(Bitmap gray, int padding) {
 		//add padding to the image to make up for any edge pixels of a bitmap lost during a calculation
 		Bitmap pad = Bitmap.createBitmap(gray.getWidth()+padding, gray.getHeight()+padding, gray.getConfig());
@@ -189,7 +187,10 @@ public class CannyEdgeDetector {
 		return pad;
 	}
 	
-	private Bitmap blur(Bitmap pad) {
+	public Bitmap blur(Bitmap in) {
+		//pad the image
+		Bitmap pad = pad(in, blurRadius);
+		
 		//apply the kernel to the image to blur
 		Bitmap blurred = Bitmap.createBitmap(width, height, pad.getConfig());
 		for (int y = 0; y < height; y++) {
