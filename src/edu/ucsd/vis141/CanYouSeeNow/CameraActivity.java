@@ -130,4 +130,8 @@ public class CameraActivity extends Activity {
 		 } else DataHolder.getInstance().setMode(DataHolder.getInstance().getMode() - 1);
 	 }
 	 
+	 public void modeToggle(View view) {
+		 DataHolder.getInstance().toggleImageMode();
+	 }
+	 
 }

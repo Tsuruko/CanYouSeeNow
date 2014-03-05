@@ -32,32 +32,46 @@ public class DataHolder {
 	
 	//data values which need to have only one instance and be viewed from all classes across the application
 	private Bitmap drawing;
+	private Bitmap img;
 	private boolean status = false;
 	private int mode = 1;
+	private boolean imgMode = false;
 	
 	public Bitmap getBitmap() {
 		return drawing;
 	}
-	
 	public void setBitmap(Bitmap m) {
 		//drawing.recycle();
 		drawing = m;
 	}
 	
+	public Bitmap getImgBitmap() {
+		return img;
+	}
+	public void setImgBitmap(Bitmap m) {
+		img = m;
+	}
+	
 	public boolean getStatus() {
 		return status;
 	}
-	
 	public void setStatus() {
 		if (drawing != null) status = true;
 	}
 	
 	public int getMode() {
 		return mode;
-	}
-	
+	}	
 	public void setMode(int i) {
 		if (i <= DARK_BLUR_TRANS) mode = i;
+	}
+	
+	public void toggleImageMode() {
+		if (imgMode) imgMode = false;
+		else imgMode = true;
+	}
+	public boolean getImageMode() {
+		return imgMode;
 	}
 	
 	//static declarations forcing one instance of this class
