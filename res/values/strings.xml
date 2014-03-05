@@ -21,5 +21,6 @@
     <string name="b2">blur</string>
     <string name="b3">dark</string>
     <string name="b4">trans</string>
+    <string name="b5">backBlur</string>
 
 </resources>

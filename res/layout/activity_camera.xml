@@ -15,12 +15,15 @@
     android:layout_height="fill_parent"
     tools:context=".CameraActivity" >
 
+    <!--
     <FrameLayout
       android:id="@+id/camera_preview"
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"
     >
     </FrameLayout>
+    
+    -->
     
 <!--  
     <ImageView
@@ -64,5 +67,13 @@
         android:layout_below="@+id/button3"
         android:onClick="modeSwitch4"
         android:text="@string/b4" />
+
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/button4"
+        android:text="Button" />
 
 </RelativeLayout>

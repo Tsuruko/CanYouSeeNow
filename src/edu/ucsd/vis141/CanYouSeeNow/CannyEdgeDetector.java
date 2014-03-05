@@ -42,6 +42,7 @@ public class CannyEdgeDetector {
 	
 	float [][] kernel;
 	float [][] output;
+	int[] out;
 	
 // constructors	
     //Constructs a new detector with default parameters.
@@ -172,7 +173,6 @@ public class CannyEdgeDetector {
 	    Bitmap ret = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
 
 	    Canvas canvas = new Canvas(ret);
-
 	    Paint paint = new Paint();
 	    paint.setColorFilter(new ColorMatrixColorFilter(cm));
 	    canvas.drawBitmap(bmp, 0, 0, paint);
@@ -220,6 +220,7 @@ public class CannyEdgeDetector {
 		float [][] yGrad = new float[width][height];
 		float [][] mag = new float[width][height];
 		output = new float[width][height];
+		out = new int[width*height];
 		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -238,14 +239,14 @@ public class CannyEdgeDetector {
 		}
 		findGrad.recycle();
 
-		//fill in the lost pixels with 0
+		//fill in the lost pixels of the computation with 0
 		for (int i = 0; i < width; i++) {
 			output[i][0] = 0;
 			output[i][height-1] = 0;
 		}
 		for (int i = 0; i < height; i++) {
 			output[0][i] = 0;
-			output[width-1][0] = 0;
+			output[width-1][i] = 0;
 		}
 		
 		//non-maximal suppression
@@ -283,8 +284,9 @@ public class CannyEdgeDetector {
 		//perform hysteresis thresholding
 		for(int x=0;x<width;x++) {
 			for(int y=0;y<height;y++) {
-				int value = ((int)output[x][y]) & 0xff; 
+				int value = ((int)output[x][y]) & 0xff;
 				if (value >= upperThreshold) {
+					out[x + width*y] = Color.WHITE;
 					output[x][y] = 0xffffffff;
 					hystConnect(x, y);
 				}
@@ -301,10 +303,12 @@ public class CannyEdgeDetector {
 					value = ((int)output[x1][y1]) & 0xff;
 					if (value != 255) {
 						if (value >= lowerThreshold) {
+							out[x1 + width*y1] = Color.WHITE;
 							output[x1][y1] = 0xffffffff;
 							hystConnect(x1, y1);
 						} 
 						else {
+							out[x1 + width*y1] = Color.BLACK;
 							output[x1][y1] = 0xff000000;
 						}
 					}
